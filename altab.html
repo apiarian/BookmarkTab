@@ -1,0 +1,185 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+	<title>New Tab</title>
+	<style type="text/css">
+	body {
+		padding: 0;
+		margin: 0;
+	}
+	.column {
+		float:left;
+		position:relative;
+		height: 100%;
+		border-right:1px solid #eee;
+	}
+	.node {
+		border: 1px solid transparent;
+		position: relative;
+	}
+	.group {
+		background-color: #eee;
+	}
+	.bookmark {
+		cursor: hand;
+		padding: 2px 0px 2px 5px;
+	}
+	.mouseover {
+		border: 1px solid #eee;
+	}
+	.delmouseover {
+		background-color: #fee;
+	}
+	.dim {
+		background-color: #aaa;
+	}
+	</style>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+	<script tyep="text/javascript">
+	$(document).ready(function() {
+		var colwidth = 225;
+		var fullwidth = $(document).width();
+		var totalcolumns = 0;
+		
+		$('#delconf').hide();
+		
+		function addColumn() {
+			$('<div><div class="inner"></div></div>')
+				.attr('id','column'+totalcolumns)
+				.addClass('column')
+				.css({'width':colwidth})
+				.appendTo($('#columns'));
+			totalcolumns++;
+		}
+		addColumn();
+		
+		$('.node')
+			.live('mouseover mouseout',
+				function(e){
+					if (e.type == 'mouseover') {
+						$(this).addClass('mouseover');
+						$(this).children('.deleteButton').show();
+					} else {
+						$(this).removeClass('mouseover');
+						$(this).children('.deleteButton').hide();
+					}
+				}
+			);
+			$('.deleteButton')
+				.live('mouseover mouseout',
+					function(e){
+						if (e.type == 'mouseover') {
+							$(this).addClass('delmouseover');
+						} else {
+							$(this).removeClass('delmouseover');
+						}
+					}
+				);
+		function makeGroupNode(n) {
+			g =  $('<div></div>')
+				.addClass('node').addClass('group')
+				.text(n.title)
+			g.node = n;
+			return g;
+		}
+		function makeBookmarkNode(n) {
+			b = $('<div></div>')
+				.addClass('node').addClass('bookmark')
+				.text(n.title)
+				.click(function(){
+					chrome.tabs.getSelected(null,function(curtab){
+						chrome.tabs.update(curtab.id, {url: n.url});
+					});
+				});
+			b.node = n;
+			d = $('<span>&nbsp;del&nbsp;</span>')
+				.addClass('deleteButton')
+				.css({
+					'position':'absolute',
+					'right':0,
+					'top':0,
+					'bottom':0,
+				})
+				.hide()
+				.click(function(e) {
+					$(this).fadeOut('fast');
+					console.log(e)
+					$('#delconf').each(function() { 
+						$(this).css({'left':e.pageX - $(this).width()/2,'top':e.pageY - $(this).height()/2})
+							.fadeIn('fast');
+						});
+					return false;
+				});
+			b.append(d)
+			return b;
+		}
+		
+		var curcol = 0
+		function addNode(n) {
+			n
+				.attr('name',n.node.title.toLowerCase())
+				.appendTo('#column'+curcol+'>.inner')
+			if ($('#column'+curcol+'>.inner').height() > $('#column'+curcol).height()) {
+				addColumn();
+				$('#column'+curcol+'>.inner').children(':last').appendTo('#column'+(curcol+1)+'>.inner');
+				curcol++;
+			}
+		}
+		function processBookmarkNode(n) {
+			if(n.title == 'Bookmarks Bar') return;
+			if(n.url) {
+				addNode(makeBookmarkNode(n));
+			} else {
+				if(n.title == 'Temporary') {
+					addColumn();
+					curcol++
+				}
+				if(n.title != 'Other Bookmarks') {
+					addNode(makeGroupNode(n));
+				}
+				for (var i=0; i<n.children.length; i++) {
+					processBookmarkNode(n.children[i]);
+				}
+			}
+		}
+		function layoutNodes() {
+			chrome.bookmarks.getTree(function(tree){
+				for (var i=0; i<tree.length; i++) {
+					processBookmarkNode(tree[i]);
+				}
+			});
+		}
+		layoutNodes();
+		$('#filter')
+			.focus(function(){
+				var $me = $(this);
+				if ($me.val() == '(filter)') {
+					$me.val('').css({color:'#000'});
+				}
+			})
+			.blur(function(){
+				var $me = $(this);
+				if ($me.val() == '') {
+					$me.val('(filter)').css({color:'#aaa'});
+				}
+			})
+			.keyup(function(){
+				$me = $(this);
+				$('.node').addClass('dim')
+				$('.node[name*='+$me.val().toLowerCase()+']').removeClass('dim');
+			})
+	});
+	</script>
+</head>
+<body>
+	<div id="ui" style="positin:absolute; top:0; left:0; right:0; height:2em;">
+		<input id="filter" type="text" value="(filter)" style="position:relative; top:50%; margin-top:-1em; left:0.5em; color:#aaa">
+	</div>
+	<div>
+	<div id="columns" style="position:absolute; top:2em; bottom:0; left:0; right:0; border-top:1px solid #eee">
+	</div>
+	<span id="delconf" style="position:absolute; border:1px solid #aaa; background-color: white">
+		&nbsp;delete? <span id="yes">yes</span> <span id="no">no</span>&nbsp;
+	</span>
+</body>
+</html>
