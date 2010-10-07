@@ -1,10 +1,10 @@
 {
-	"name": "altab",
+	"name": "BookmarkTab",
 	"version": "0.1",
 	
 	"description": "Bookmarks in the new tab page",
 	"icons": {"48":"bookmarks.png"},
 	
-	"chrome_url_overrides": {"newtab":"altab.html"},
+	"chrome_url_overrides": {"newtab":"BookmarkTab.html"},
 	"permissions": ["bookmarks","chrome://favicon/","unlimited_storage","tabs"]
 }
