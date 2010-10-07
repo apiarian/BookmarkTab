@@ -27,9 +27,6 @@
 	.mouseover {
 		border: 1px solid #eee;
 	}
-	.delmouseover {
-		background-color: #fee;
-	}
 	.dim {
 		background-color: #aaa;
 	}
@@ -40,8 +37,6 @@
 		var colwidth = 225;
 		var fullwidth = $(document).width();
 		var totalcolumns = 0;
-		
-		$('#delconf').hide();
 		
 		function addColumn() {
 			$('<div><div class="inner"></div></div>')
@@ -65,16 +60,6 @@
 					}
 				}
 			);
-			$('.deleteButton')
-				.live('mouseover mouseout',
-					function(e){
-						if (e.type == 'mouseover') {
-							$(this).addClass('delmouseover');
-						} else {
-							$(this).removeClass('delmouseover');
-						}
-					}
-				);
 		function makeGroupNode(n) {
 			g =  $('<div></div>')
 				.addClass('node').addClass('group')
@@ -92,25 +77,6 @@
 					});
 				});
 			b.node = n;
-			d = $('<span>&nbsp;del&nbsp;</span>')
-				.addClass('deleteButton')
-				.css({
-					'position':'absolute',
-					'right':0,
-					'top':0,
-					'bottom':0,
-				})
-				.hide()
-				.click(function(e) {
-					$(this).fadeOut('fast');
-					console.log(e)
-					$('#delconf').each(function() { 
-						$(this).css({'left':e.pageX - $(this).width()/2,'top':e.pageY - $(this).height()/2})
-							.fadeIn('fast');
-						});
-					return false;
-				});
-			b.append(d)
 			return b;
 		}
 		
@@ -173,13 +139,10 @@
 </head>
 <body>
 	<div id="ui" style="positin:absolute; top:0; left:0; right:0; height:2em;">
-		<input id="filter" type="text" value="(filter)" style="position:relative; top:50%; margin-top:-1em; left:0.5em; color:#aaa">
+		<input id="filter" type="text" value="(filter)" style="position:relative; top:50%; margin-top:-1em; left:0.5em; color:#aaa"/>
 	</div>
 	<div>
 	<div id="columns" style="position:absolute; top:2em; bottom:0; left:0; right:0; border-top:1px solid #eee">
 	</div>
-	<span id="delconf" style="position:absolute; border:1px solid #aaa; background-color: white">
-		&nbsp;delete? <span id="yes">yes</span> <span id="no">no</span>&nbsp;
-	</span>
 </body>
 </html>
