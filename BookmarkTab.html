@@ -30,6 +30,17 @@
 	.dim {
 		background-color: #aaa;
 	}
+	.deleteButton{
+		position:absolute;
+		right:0;
+		top: 0;
+		bottom: 0;
+		padding: 0 5px;
+		vertical-align: middle;
+	}
+	.delMouseover {
+		background-color: #fee;
+	}
 	</style>
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
 	<script tyep="text/javascript">
@@ -60,6 +71,16 @@
 					}
 				}
 			);
+		$('.deleteButton')
+			.live('mouseover mouseout',
+				function(e){
+					if(e.type == 'mouseover') {
+						$(this).addClass('delMouseover');
+					} else {
+						$(this).removeClass('delMouseover');
+					}
+				}
+			);
 		function makeGroupNode(n) {
 			g =  $('<div></div>')
 				.addClass('node').addClass('group')
@@ -76,6 +97,13 @@
 						chrome.tabs.update(curtab.id, {url: n.url});
 					});
 				});
+			d = $('<div>del</div>')
+				.addClass('deleteButton')
+				.click(function(e){
+					return false;
+				})
+				.hide();
+			b.append(d);
 			b.node = n;
 			return b;
 		}
@@ -144,5 +172,6 @@
 	<div>
 	<div id="columns" style="position:absolute; top:2em; bottom:0; left:0; right:0; border-top:1px solid #eee">
 	</div>
+	
 </body>
 </html>
