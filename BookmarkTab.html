@@ -30,6 +30,36 @@
 	.dim {
 		background-color: #aaa;
 	}
+	.deleteButton{
+		position:absolute;
+		right:0;
+		top: 0;
+		bottom: 0;
+		padding: 0 5px;
+		vertical-align: middle;
+	}
+	.delMouseover {
+		background-color: #fee;
+	}
+	#deleteConfirm {
+		cursor: pointer;
+	}
+	#deleteConfirm>span {
+		cursor: hand;
+		padding: 0 3px;
+	}
+	#yes {
+		border: 1px solid green;
+	}
+	.yesMouseover{
+		background-color: #efe;
+	}
+	#no {
+		border: 1px solid red;
+	}
+	.noMouseover{
+		background-color: #fee;
+	}
 	</style>
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
 	<script tyep="text/javascript">
@@ -37,6 +67,8 @@
 		var colwidth = 250;
 		var fullwidth = $(document).width();
 		var totalcolumns = 0;
+		var curcol = 0
+		var toBeDeleted;
 		
 		function addColumn() {
 			$('<div><div class="inner"></div></div>')
@@ -60,6 +92,48 @@
 					}
 				}
 			);
+		$('.deleteButton')
+			.live('mouseover mouseout',
+				function(e){
+					if(e.type == 'mouseover') {
+						$(this).addClass('delMouseover');
+					} else {
+						$(this).removeClass('delMouseover');
+					}
+				}
+			);
+		$('#yes')
+			.bind('mouseover mouseout',
+				function(e){
+					if(e.type == 'mouseover') {
+						$(this).addClass('yesMouseover');
+					} else {
+						$(this).removeClass('yesMouseover');
+					}
+				})
+			.click(
+				function(e){
+					chrome.bookmarks.remove(toBeDeleted.attr('nodeID'));
+					$('#deleteConfirm').hide();
+					$('#columns').empty();
+					totalcolumns= 0;
+					curcol = 0;
+					addColumn();
+					layoutNodes();
+				});
+		$('#no')
+			.bind('mouseover mouseout',
+				function(e){
+					if(e.type == 'mouseover') {
+						$(this).addClass('noMouseover');
+					} else {
+						$(this).removeClass('noMouseover');
+					}
+				})
+			.click(
+				function(e){
+					$('#deleteConfirm').hide();
+				});
 		function makeGroupNode(n) {
 			g =  $('<div></div>')
 				.addClass('node').addClass('group')
@@ -76,11 +150,23 @@
 						chrome.tabs.update(curtab.id, {url: n.url});
 					});
 				});
+			d = $('<div>del</div>')
+				.addClass('deleteButton')
+				.click(function(e){
+					$('#deleteConfirm')
+						.css({'top':(e.pageY - ($('#deleteConfirm').height() / 2) - 1), 
+						      'left':(e.pageX - ($('#deleteConfirm').width() / 2))})
+						.show();
+					toBeDeleted = $(this).parent();
+					return false;
+				})
+				.hide();
+			b.attr('nodeID',n.id);
+			b.append(d);
 			b.node = n;
 			return b;
 		}
 		
-		var curcol = 0
 		function addNode(n) {
 			n
 				.attr('name',n.node.title.toLowerCase())
@@ -144,5 +230,7 @@
 	<div>
 	<div id="columns" style="position:absolute; top:2em; bottom:0; left:0; right:0; border-top:1px solid #eee">
 	</div>
+	<div id="deleteConfirm" style="position:absolute; padding: 3px; background-color: white; border: 1px solid red; display: none;">
+		delete? <span id="yes">yes</span>&nbsp;<span id="no">no</span></div>
 </body>
 </html>
