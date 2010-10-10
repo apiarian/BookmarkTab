@@ -189,9 +189,8 @@
 			if(n.url) {
 				addNode(makeBookmarkNode(n));
 			} else {
-				if(n.title == 'Temporary') {
-					addColumn();
-					curcol++
+				if(n.id == localStorage['TemporaryBookmarkGroup']) {
+					return;
 				}
 				if(n.title != 'Other Bookmarks') {
 					addNode(makeGroupNode(n));
@@ -206,6 +205,16 @@
 				for (var i=0; i<tree.length; i++) {
 					processBookmarkNode(tree[i]);
 				}
+				chrome.bookmarks.get(localStorage['TemporaryBookmarkGroup'], function(tmp) {
+					addColumn();
+					curcol++;
+					addNode(makeGroupNode(tmp[0]));
+					chrome.bookmarks.getChildren(localStorage['TemporaryBookmarkGroup'], function(child){
+						for (var i=0; i<child.length; i++) {
+							processBookmarkNode(child[i]);
+						}
+					});
+				});
 			});
 		}
 		layoutNodes();

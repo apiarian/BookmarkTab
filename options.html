@@ -6,10 +6,11 @@
 	$(document).ready(function() {
 		function save_options() {
 			var selected = new Array();
-			$('#groups option:selected').each(function() {
+			$('#omittedGroups option:selected').each(function() {
 				selected.push($(this).attr('value'));
 			})
 			localStorage['OmittedBookmarkGroups'] = selected;
+			localStorage['TemporaryBookmarkGroup'] = $('#tempGroup option:selected').attr('value');
 			$('#status').text('Options saved.');
 			setTimeout(function() {
 				$('#status').empty();
@@ -20,25 +21,24 @@
 			if (!omitted) {
 				return;
 			}
-			$('#groups option').each(function(){
+			$('#omittedGroups option').each(function(){
 				$(this).removeAttr('selected');
 			})
 			for(var i=0; i<omitted.length; i++) {
-				$('#groups option[value="'+omitted[i]+'"]').attr('selected','selected');
+				$('#omittedGroups option[value="'+omitted[i]+'"]').attr('selected','selected');
 			}
+			$('#tempGroup option[value="'+localStorage['TemporaryBookmarkGroup']+'"]').attr('selected','selected');
 		};
 		$('#save').click(function(){
 			save_options();
-		});
-		$('#restore').click(function(){
-			restore_options();
 		});
 		function processBookmarkNode(n) {
 			if(!n.url && n.title != '') {
 				opt = $('<option></option>')
 					.text(n.title)
 					.attr('value',n.id);
-				$('#groups').append(opt);
+				$('#omittedGroups').append(opt);
+				$('#tempGroup').append($(opt).clone());
 			}
 			if(n.children) {
 				for (var i=0; i<n.children.length; i++) {
@@ -50,7 +50,7 @@
 			for (var i=0; i<tree.length; i++) {
 				processBookmarkNode(tree[i]);
 			}
-			$('#groups').attr('size',$('#groups').children().length);
+			$('#omittedGroups').attr('size',$('#omittedGroups').children().length);
 			restore_options();
 		});
 	});
@@ -58,9 +58,12 @@
 </head>
 <body style="margin: 20 auto;">
 	<div style="margin:0 auto; width: 200px; text-align: center; border:1px solid #eee">
-		<span>Select the groups you would like to hide:</span>
-		<select id="groups" multiple="multiple" style="width: 200px;"><option value="">--none--</option></select>
-		<br/>
+		<span>Select the groups you would like to hide (the title of Other Bookmarks is hidden automatically): </span>
+		<select id="omittedGroups" multiple="multiple" style="width: 200px;"><option value="">--none--</option></select>
+		<br/><br/>
+		<span>Select the Temporary Bookmarks group which will be displayed as the last column:</span>
+		<select id="tempGroup" style=""><option value="">--none--</option></select>
+		<br/><br/>
 		<button id="save">save</button>
 		<br/>
 		<div id="status" style="border-top: 1px solid #eee"></div>
