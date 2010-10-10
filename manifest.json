@@ -6,5 +6,6 @@
 	"icons": {"48":"bookmarks.png"},
 	
 	"chrome_url_overrides": {"newtab":"BookmarkTab.html"},
+	"options_page": "options.html",
 	"permissions": ["bookmarks","chrome://favicon/","unlimited_storage","tabs"]
 }

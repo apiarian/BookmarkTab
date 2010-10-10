@@ -178,7 +178,14 @@
 			}
 		}
 		function processBookmarkNode(n) {
-			if(n.title == 'Bookmarks Bar') return;
+			var omitted = localStorage['OmittedBookmarkGroups'].split(',');
+			if (omitted) {
+				for(var i=0; i<omitted.length; i++) {
+					if(n.id == omitted[i]) {
+						return;
+					}
+				}
+			}
 			if(n.url) {
 				addNode(makeBookmarkNode(n));
 			} else {
@@ -220,12 +227,16 @@
 				$('.node').addClass('dim')
 				$('.node[name*='+$me.val().toLowerCase()+']').removeClass('dim');
 			})
+		$('#options').click(function(){
+			chrome.tabs.create({url: "options.html"});
+		})
 	});
 	</script>
 </head>
 <body>
 	<div id="ui" style="positin:absolute; top:0; left:0; right:0; height:2em;">
 		<input id="filter" type="text" value="(filter)" style="position:relative; top:50%; margin-top:-1em; left:0.5em; color:#aaa"/>
+		<a id="options" style="position:absolute; right: 0.5em; top: 0.5em; height: 1em; cursor: pointer; color:#aaa">options</a>
 	</div>
 	<div>
 	<div id="columns" style="position:absolute; top:2em; bottom:0; left:0; right:0; border-top:1px solid #eee">

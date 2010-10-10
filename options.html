@@ -1,0 +1,68 @@
+<html>
+<head>
+	<title>BookmarkTab Options</title>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+	<script type="text/javascript">
+	$(document).ready(function() {
+		function save_options() {
+			var selected = new Array();
+			$('#groups option:selected').each(function() {
+				selected.push($(this).attr('value'));
+			})
+			localStorage['OmittedBookmarkGroups'] = selected;
+			$('#status').text('Options saved.');
+			setTimeout(function() {
+				$('#status').empty();
+			},1000);
+		};
+		function restore_options() {
+			var omitted = localStorage['OmittedBookmarkGroups'].split(',');
+			if (!omitted) {
+				return;
+			}
+			$('#groups option').each(function(){
+				$(this).removeAttr('selected');
+			})
+			for(var i=0; i<omitted.length; i++) {
+				$('#groups option[value="'+omitted[i]+'"]').attr('selected','selected');
+			}
+		};
+		$('#save').click(function(){
+			save_options();
+		});
+		$('#restore').click(function(){
+			restore_options();
+		});
+		function processBookmarkNode(n) {
+			if(!n.url && n.title != '') {
+				opt = $('<option></option>')
+					.text(n.title)
+					.attr('value',n.id);
+				$('#groups').append(opt);
+			}
+			if(n.children) {
+				for (var i=0; i<n.children.length; i++) {
+					processBookmarkNode(n.children[i]);
+				}
+			}
+		}
+		chrome.bookmarks.getTree(function(tree){
+			for (var i=0; i<tree.length; i++) {
+				processBookmarkNode(tree[i]);
+			}
+		});
+		restore_options();
+	});
+	</script>
+</head>
+<body style="margin: 20 auto;">
+	<div style="margin:0 auto; width: 200px; text-align: center; border:1px solid #eee">
+		<span>Select the groups you would like to hide:</span>
+		<select id="groups" multiple="multiple" style="width: 200px;"><option value="">--none--</option></select>
+		<br/>
+		<button id="save">save</button>
+		<br/>
+		<div id="status" style="border-top: 1px solid #eee"></div>
+	</div>
+</body>
+</html>
