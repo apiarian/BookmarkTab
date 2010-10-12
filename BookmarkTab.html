@@ -4,18 +4,23 @@
 	<title>New Tab</title>
 	<style type="text/css">
 	body {
-		padding: 0;
-		margin: 0;
+		padding:0;
+		margin:0;
 	}
-	.column {
-		float:left;
-		position:relative;
-		height: 100%;
-		border-right:1px solid #eee;
+	#columns {
+		position:absolute;
+		top:2em;
+		bottom:0;
+		left:0;
+		right:0;
+		border-top:1px solid #eee;
+		-webkit-column-width: 240px;
+		-webkit-column-gap: 2px;
 	}
 	.node {
 		border: 1px solid transparent;
-		position: relative;
+		width: 240px;
+		display: block;
 	}
 	.group {
 		background-color: #eee;
@@ -31,12 +36,8 @@
 		background-color: #aaa;
 	}
 	.deleteButton{
-		position:absolute;
-		right:0;
-		top: 0;
-		bottom: 0;
+		float: right;
 		padding: 0 5px;
-		vertical-align: middle;
 	}
 	.delMouseover {
 		background-color: #fee;
@@ -64,21 +65,7 @@
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
 	<script tyep="text/javascript">
 	$(document).ready(function() {
-		var colwidth = 250;
-		var fullwidth = $(document).width();
-		var totalcolumns = 0;
-		var curcol = 0
 		var toBeDeleted;
-		
-		function addColumn() {
-			$('<div><div class="inner"></div></div>')
-				.attr('id','column'+totalcolumns)
-				.addClass('column')
-				.css({'width':colwidth})
-				.appendTo($('#columns'));
-			totalcolumns++;
-		}
-		addColumn();
 		
 		$('.node')
 			.live('mouseover mouseout',
@@ -114,12 +101,8 @@
 			.click(
 				function(e){
 					chrome.bookmarks.remove(toBeDeleted.attr('nodeID'));
+					$('.node[nodeid="'+toBeDeleted.attr('nodeID')+'"]').remove();
 					$('#deleteConfirm').hide();
-					$('#columns').empty();
-					totalcolumns= 0;
-					curcol = 0;
-					addColumn();
-					layoutNodes();
 				});
 		$('#no')
 			.bind('mouseover mouseout',
@@ -138,6 +121,7 @@
 			g =  $('<div></div>')
 				.addClass('node').addClass('group')
 				.text(n.title)
+				.attr('nodeid',n.id);
 			g.node = n;
 			return g;
 		}
@@ -150,7 +134,7 @@
 						chrome.tabs.update(curtab.id, {url: n.url});
 					});
 				});
-			d = $('<div>del</div>')
+			d = $('<span>del</span>')
 				.addClass('deleteButton')
 				.click(function(e){
 					$('#deleteConfirm')
@@ -170,14 +154,9 @@
 		function addNode(n) {
 			n
 				.attr('name',n.node.title.toLowerCase())
-				.appendTo('#column'+curcol+'>.inner')
-			if ($('#column'+curcol+'>.inner').height() > $('#column'+curcol).height()) {
-				addColumn();
-				$('#column'+curcol+'>.inner').children(':last').appendTo('#column'+(curcol+1)+'>.inner');
-				curcol++;
-			}
+				.appendTo('#columns');
 		}
-		function processBookmarkNode(n) {
+		function processBookmarkNode(n, target) {
 			var omitted = localStorage['OmittedBookmarkGroups'].split(',');
 			if (omitted) {
 				for(var i=0; i<omitted.length; i++) {
@@ -192,11 +171,11 @@
 				if(n.id == localStorage['TemporaryBookmarkGroup']) {
 					return;
 				}
-				if(n.title != 'Other Bookmarks') {
+				if(n.title != 'Other Bookmarks' && n.title != '') {
 					addNode(makeGroupNode(n));
 				}
 				for (var i=0; i<n.children.length; i++) {
-					processBookmarkNode(n.children[i]);
+					processBookmarkNode(n.children[i],target);
 				}
 			}
 		}
@@ -206,9 +185,8 @@
 					processBookmarkNode(tree[i]);
 				}
 				chrome.bookmarks.get(localStorage['TemporaryBookmarkGroup'], function(tmp) {
-					addColumn();
-					curcol++;
 					addNode(makeGroupNode(tmp[0]));
+					$('#columns').children().last().css({'-webkit-column-break-before':'always'})
 					chrome.bookmarks.getChildren(localStorage['TemporaryBookmarkGroup'], function(child){
 						for (var i=0; i<child.length; i++) {
 							processBookmarkNode(child[i]);
@@ -248,7 +226,7 @@
 		<a id="options" style="position:absolute; right: 0.5em; top: 0.5em; height: 1em; cursor: pointer; color:#aaa">options</a>
 	</div>
 	<div>
-	<div id="columns" style="position:absolute; top:2em; bottom:0; left:0; right:0; border-top:1px solid #eee">
+	<div id="columns">
 	</div>
 	<div id="deleteConfirm" style="position:absolute; padding: 3px; background-color: white; border: 1px solid red; display: none;">
 		delete? <span id="yes">yes</span>&nbsp;<span id="no">no</span></div>
