@@ -157,13 +157,16 @@
 				.appendTo('#columns');
 		}
 		function processBookmarkNode(n, target) {
-			var omitted = localStorage['OmittedBookmarkGroups'].split(',');
+			var omitted = localStorage['OmittedBookmarkGroups'];
 			if (omitted) {
+				omitted = omitted.split(',');
 				for(var i=0; i<omitted.length; i++) {
 					if(n.id == omitted[i]) {
 						return;
 					}
 				}
+			} else {
+				localStorage['OmittedBookmarkGroups'] = '';
 			}
 			if(n.url) {
 				addNode(makeBookmarkNode(n));
@@ -184,16 +187,24 @@
 				for (var i=0; i<tree.length; i++) {
 					processBookmarkNode(tree[i]);
 				}
-				chrome.bookmarks.get(localStorage['TemporaryBookmarkGroup'], function(tmp) {
-					addNode(makeGroupNode(tmp[0]));
-					$('#columns').children().last().css({'-webkit-column-break-before':'always'})
-					chrome.bookmarks.getChildren(localStorage['TemporaryBookmarkGroup'], function(child){
-						for (var i=0; i<child.length; i++) {
-							processBookmarkNode(child[i]);
-						}
+				if(localStorage['TemporaryBookmarkGroup'] != '') {
+					chrome.bookmarks.get(localStorage['TemporaryBookmarkGroup'], function(tmp) {
+						addNode(makeGroupNode(tmp[0]));
+						$('#columns').children().last().css({'-webkit-column-break-before':'always'})
+						chrome.bookmarks.getChildren(localStorage['TemporaryBookmarkGroup'], function(child){
+							for (var i=0; i<child.length; i++) {
+								processBookmarkNode(child[i]);
+							}
+						});
 					});
-				});
+				}
 			});
+		}
+		if(!localStorage['OmittedBookmarkGroups']) {
+			localStorage['OmittedBookmarkGroups'] = '';
+		}
+		if(!localStorage['TemporaryBookmarkGroup']) {
+			localStorage['TemporaryBookmarkGroup'] = '';
 		}
 		layoutNodes();
 		$('#filter')
