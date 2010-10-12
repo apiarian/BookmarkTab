@@ -174,7 +174,7 @@
 				if(n.id == localStorage['TemporaryBookmarkGroup']) {
 					return;
 				}
-				if(n.title != 'Other Bookmarks' && n.title != '') {
+				if(n.title.toLowerCase() != 'other bookmarks' && n.title != '') {
 					addNode(makeGroupNode(n));
 				}
 				for (var i=0; i<n.children.length; i++) {
