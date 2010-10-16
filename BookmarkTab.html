@@ -137,10 +137,13 @@
 			d = $('<span>del</span>')
 				.addClass('deleteButton')
 				.click(function(e){
-					$('#deleteConfirm')
-						.css({'top':(e.pageY - ($('#deleteConfirm').height() / 2) - 1), 
-						      'left':(e.pageX - ($('#deleteConfirm').width() / 2))})
-						.show();
+					$('#deleteConfirm').css('top',(e.pageY - $('#deleteConfirm').height() - 8));
+					if (e.pageX+$('#deleteConfirm').width()<$(window).width()) {
+						$('#deleteConfirm').css('left',(e.pageX));
+					} else {
+						$('#deleteConfirm').css('left',(e.pageX - $('#deleteConfirm').width() - 8));
+					}
+					$('#deleteConfirm').show();
 					toBeDeleted = $(this).parent();
 					return false;
 				})
@@ -190,7 +193,7 @@
 				if(localStorage['TemporaryBookmarkGroup'] != '') {
 					chrome.bookmarks.get(localStorage['TemporaryBookmarkGroup'], function(tmp) {
 						addNode(makeGroupNode(tmp[0]));
-						$('#columns').children().last().css({'-webkit-column-break-before':'always'})
+						$('#columns').children().last().css({'-webkit-column-break-before':'always'}).hide().fadeIn(0);
 						chrome.bookmarks.getChildren(localStorage['TemporaryBookmarkGroup'], function(child){
 							for (var i=0; i<child.length; i++) {
 								processBookmarkNode(child[i]);
