@@ -23,4 +23,4 @@ This extension will be available in the [Google Chrome Extensions][extensions] l
 To use this extension from source: download the source, open the *Developer mode* in chrome://extensions, and open the srouce directory with *Load unpacked extension...*.
 
 [chrome]: http://chrome.google.com
-[extension]: https://chrome.google.com/extensions/
+[extensions]: https://chrome.google.com/extensions/
