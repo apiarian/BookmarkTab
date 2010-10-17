@@ -20,6 +20,8 @@ Distribution
 
 This extension will be available in the [Google Chrome Extensions][extensions] list as soon as it has been sufficiently tested.
 
+A packaged BookmarkTab.crx version of the extensio is included with the source.  Simply drag this file into Google Chrome and it should install automatically.
+
 To use this extension from source: download the source, open the *Developer mode* in chrome://extensions, and open the srouce directory with *Load unpacked extension...*.
 
 [chrome]: http://chrome.google.com
